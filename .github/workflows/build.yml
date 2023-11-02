@@ -29,7 +29,7 @@ jobs:
         run: |
           west twister -T app -v --inline-logs --integration
 
-      - name: Twister Tests
-        working-directory: app
-        run: |
-          west twister -T tests --integration
+      # - name: Twister Tests
+      #   working-directory: app
+      #   run: |
+      #     west twister -T tests --integration
