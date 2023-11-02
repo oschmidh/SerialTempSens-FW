@@ -1,4 +1,5 @@
 # SerialTempSens Firmware
+![build](https://github.com/oschmidh/SerialTempSens-FW/actions/workflows/build.yml/badge.svg?branch=main)
 
 This is the repo for the FW of the SerialTempSens Project.
 It implements a Serial interface to enable a connected device (e.g. PC) to read temperatures from various sensors.
