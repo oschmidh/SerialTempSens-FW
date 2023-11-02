@@ -1,0 +1,48 @@
+Standard: c++20
+
+ColumnLimit: 120
+
+# Indentation
+IndentWidth: 4
+IndentCaseLabels: true
+IndentCaseBlocks: true
+IndentAccessModifiers: false
+AccessModifierOffset: -3
+IndentPPDirectives: BeforeHash
+IndentRequiresClause: true
+
+SpacesBeforeTrailingComments: 4
+
+# Alignment
+AlignEscapedNewlines: Left
+# AlignTrailingComments:
+#   Kind: Always
+#   OverEmptyLines: 2
+
+PackConstructorInitializers: Never
+ConstructorInitializerIndentWidth: 1
+BreakConstructorInitializers: BeforeComma
+
+ReflowComments: true
+PenaltyBreakComment: 0
+PenaltyBreakOpenParenthesis: 1
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterStruct: false
+  AfterNamespace: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+
+SortIncludes: Never
+
+SpaceAfterTemplateKeyword: true
+SpaceInEmptyBlock: true
+
+PointerAlignment: Left
+
+AlwaysBreakTemplateDeclarations: Yes
+
+AllowShortCaseLabelsOnASingleLine: true
+Cpp11BracedListStyle: true
