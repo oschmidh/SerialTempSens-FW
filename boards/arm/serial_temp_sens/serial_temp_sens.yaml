@@ -1,0 +1,18 @@
+# Copyright (c) 2021 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+identifier: serial_temp_sens
+name: SerialTempSens
+type: mcu
+arch: arm
+ram: 144
+flash: 256
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+supported:
+  - gpio
+  - adc
+  - usb_device
+vendor: st

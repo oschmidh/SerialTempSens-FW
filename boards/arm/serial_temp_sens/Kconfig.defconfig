@@ -1,0 +1,9 @@
+# Copyright (c) 2021 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+if BOARD_SERIAL_TEMP_SENS
+
+config BOARD
+	default "serial_temp_sens"
+
+endif # BOARD_SERIAL_TEMP_SENS
