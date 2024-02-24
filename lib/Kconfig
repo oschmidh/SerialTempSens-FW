@@ -4,5 +4,6 @@
 menu "Libraries"
 
 rsource "EmbeddedProto/Kconfig"
+rsource "myLib/Kconfig"
 
 endmenu
