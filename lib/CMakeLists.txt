@@ -1,1 +1,2 @@
 add_subdirectory_ifdef(CONFIG_EMBEDDEDPROTO EmbeddedProto)
+add_subdirectory_ifdef(CONFIG_MYLIB myLib)
