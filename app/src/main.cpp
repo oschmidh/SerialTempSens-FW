@@ -1,4 +1,4 @@
-#include <generated/EmbeddedProto/SerialTempSens_messages.h>
+#include <SerialTempSens_messages.h>
 
 #include "WriteBuffer.hpp"
 
