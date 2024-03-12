@@ -1,5 +1,5 @@
-#ifndef APP_INCLUDE_MESSAGECHANNEL_H
-#define APP_INCLUDE_MESSAGECHANNEL_H
+#ifndef SERIALTEMPSENS_FW_APP_INCLUDE_MESSAGECHANNEL_H
+#define SERIALTEMPSENS_FW_APP_INCLUDE_MESSAGECHANNEL_H
 
 #include "Uart.hpp"
 #include "FramedWriteBuffer.hpp"
@@ -99,4 +99,4 @@ class MessageChannel {
     Uart<UartBuffer<32>> _uart;
 };
 
-#endif    // APP_INCLUDE_MESSAGECHANNEL_H
+#endif    // SERIALTEMPSENS_FW_APP_INCLUDE_MESSAGECHANNEL_H
