@@ -1,2 +1,3 @@
 config EMBEDDEDPROTO
     bool "EmbeddedProto"
+    select REQUIRES_FULL_LIBCPP
