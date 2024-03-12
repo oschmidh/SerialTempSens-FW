@@ -1,5 +1,5 @@
-#ifndef APP_INCLUDE_FRAMEDWRITEBUFFER_H
-#define APP_INCLUDE_FRAMEDWRITEBUFFER_H
+#ifndef SERIALTEMPSENS_FW_APP_INCLUDE_FRAMEDWRITEBUFFER_H
+#define SERIALTEMPSENS_FW_APP_INCLUDE_FRAMEDWRITEBUFFER_H
 
 #include <WriteBufferInterface.h>
 
@@ -54,4 +54,4 @@ class FramedWriteBuffer final : public ::EmbeddedProto::WriteBufferInterface {
     static_assert(sizeof(_framedBuf) == SIZE_V + 1);
 };
 
-#endif    // APP_INCLUDE_FRAMEDWRITEBUFFER_H
+#endif    // SERIALTEMPSENS_FW_APP_INCLUDE_FRAMEDWRITEBUFFER_H

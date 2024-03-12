@@ -1,5 +1,5 @@
-#ifndef APP_INCLUDE_UART_H
-#define APP_INCLUDE_UART_H
+#ifndef SERIALTEMPSENS_FW_APP_INCLUDE_UART_H
+#define SERIALTEMPSENS_FW_APP_INCLUDE_UART_H
 
 #include <myLib/RingBuffer.hpp>
 #include <myLib/Semaphore.hpp>
@@ -124,4 +124,4 @@ class Uart {
     BUFFER_T& _recvBuf;
 };
 
-#endif    // APP_INCLUDE_UART_H
+#endif    // SERIALTEMPSENS_FW_APP_INCLUDE_UART_H
