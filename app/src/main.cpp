@@ -8,6 +8,7 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/drivers/sensor.h>
+#include <zephyr/usb/usb_device.h>
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
@@ -63,11 +64,6 @@ int main()
         DEVICE_DT_GET(DT_NODELABEL(sens1)),
         DEVICE_DT_GET(DT_NODELABEL(sens2)),
     };
-
-    if (!device_is_ready(uart_dev)) {
-        printk("UART device not found!");
-        return 0;
-    }
 
     if (uart_irq_callback_user_data_set(uart_dev, serial_cb, NULL) != 0) {
         return 0;
