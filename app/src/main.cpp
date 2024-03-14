@@ -27,6 +27,7 @@ int main()
     }
 
     channel.start();    // starts rx interrupt
+    LOG_DBG("msgChannel started");
 
     while (1) {
         const Command cmd = channel.receive<Command>();
@@ -57,7 +58,7 @@ int main()
             rply.set_error(ErrorCode::NoError);
         }
 
-        channel.send(rply);
+        channel.send(rply);    // TODO create raii replyFinisher
     }
 
     return 0;
