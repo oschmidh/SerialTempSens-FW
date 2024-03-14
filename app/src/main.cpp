@@ -4,7 +4,7 @@
 
 // #include <zephyr/kernel.h>
 #include <zephyr/device.h>
-#include <zephyr/drivers/uart.h>
+// #include <zephyr/drivers/uart.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/logging/log.h>
@@ -64,13 +64,15 @@ int main()
     MessageChannel channel(uart_dev);
 
     if (!channel.init()) {
-        // TODO log error
+        LOG_ERR("Failed to init MessageChannel");
     }
 
     channel.start();    // starts rx interrupt
+    LOG_DBG("msgChannel started");
 
     while (1) {
         const Command cmd = channel.receive<Command>();
+        LOG_DBG("command received");
 
         Reply rply;
 
@@ -86,7 +88,7 @@ int main()
             rply.set_temperature(sensor_value_to_milli(&temp));
         }
 
-        channel.send(rply);
+        channel.send(rply);    // TODO create raii replyFinisher
     }
 
     return 0;
