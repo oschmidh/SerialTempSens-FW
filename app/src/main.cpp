@@ -72,17 +72,19 @@ int main()
     while (1) {
         const Command cmd = channel.receive<Command>();
 
+        Reply rply;
+
         if (cmd.sensorId() >= tempSensors.size()) {
             LOG_WRN("Invalid sensor ID received");
-            continue;
+            rply.set_error(ErrorCode::InvalidSensorId);
+        } else {
+            sensor_sample_fetch(tempSensors[cmd.sensorId()]);
+
+            struct sensor_value temp;
+            sensor_channel_get(tempSensors[cmd.sensorId()], SENSOR_CHAN_AMBIENT_TEMP, &temp);
+            rply.set_error(ErrorCode::NoError);
+            rply.set_temperature(sensor_value_to_milli(&temp));
         }
-        sensor_sample_fetch(tempSensors[receivedCmd.sensorId()]);
-
-        struct sensor_value temp;
-        sensor_channel_get(tempSensors[receivedCmd.sensorId()], SENSOR_CHAN_AMBIENT_TEMP, &temp);
-
-        Reply rply;
-        rply.set_temperature(sensor_value_to_milli(&temp));
 
         channel.send(rply);
     }
