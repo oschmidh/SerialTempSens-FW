@@ -34,7 +34,7 @@ int main()
 
         Reply rply;
 
-        const auto ret = sensors.get(receivedCmd.sensorId());
+        const auto ret = sensors.get(cmd.sensorId());
         if (!ret.has_value()) {
             switch (ret.error()) {
                 case SensorError::InvalidId:
@@ -44,7 +44,7 @@ int main()
 
                 case SensorError::NotPresent:
                     rply.set_error(ErrorCode::SensorOpen);
-                    LOG_ERR("no sensor connected on channel %d", receivedCmd.sensorId());
+                    LOG_ERR("no sensor connected on channel %d", cmd.sensorId());
                     break;
 
                 case SensorError::ReadFail:
@@ -53,8 +53,8 @@ int main()
                     break;
             }
         } else {
-            rply.set_error(ErrorCode::NoError);
             rply.set_temperature(ret.value());
+            rply.set_error(ErrorCode::NoError);
         }
 
         channel.send(rply);
