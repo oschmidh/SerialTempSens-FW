@@ -70,25 +70,25 @@ int main()
     channel.start();    // starts rx interrupt
     LOG_DBG("msgChannel started");
 
-    while (1) {
-        const Command cmd = channel.receive<Command>();
+    auto process = [&tempSensors](const Command& cmd) -> Reply {
         LOG_DBG("command received");
-
-        Reply rply;
 
         if (cmd.sensorId() >= tempSensors.size()) {
             LOG_WRN("Invalid sensor ID received");
+            Reply rply;
             rply.set_error(ErrorCode::InvalidSensorId);
-        } else {
-            sensor_sample_fetch(tempSensors[cmd.sensorId()]);
-
-            struct sensor_value temp;
-            sensor_channel_get(tempSensors[cmd.sensorId()], SENSOR_CHAN_AMBIENT_TEMP, &temp);
-            rply.set_error(ErrorCode::NoError);
-            rply.set_temperature(sensor_value_to_milli(&temp));
+            return rply;
         }
 
-        channel.send(rply);    // TODO create raii replyFinisher
+        tempSensors[cmd.sensorId()].fetch();
+        Reply rply;
+        rply.set_temperature(tempSensors[cmd.sensorId()].getTempMilli());
+        rply.set_error(ErrorCode::NoError);
+        return rply;
+    };
+
+    while (1) {
+        channel.run(process);
     }
 
     return 0;
