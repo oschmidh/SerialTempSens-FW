@@ -29,8 +29,7 @@ int main()
     channel.start();    // starts rx interrupt
     LOG_DBG("msgChannel started");
 
-    while (1) {
-        const Command cmd = channel.receive<Command>();
+    auto process = [&tempSensors](const Command& cmd) -> Reply {
         LOG_DBG("command received");
 
         Reply rply;
@@ -53,12 +52,16 @@ int main()
                     LOG_ERR("Failed to read sensor");
                     break;
             }
-        } else {
-            rply.set_temperature(ret.value());
-            rply.set_error(ErrorCode::NoError);
+            return rply;
         }
 
-        channel.send(rply);    // TODO create raii replyFinisher
+        rply.set_temperature(ret.value());
+        rply.set_error(ErrorCode::NoError);
+        return rply;
+    };
+
+    while (1) {
+        channel.run(process);
     }
 
     return 0;

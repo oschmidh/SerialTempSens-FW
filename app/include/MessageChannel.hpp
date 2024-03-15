@@ -78,6 +78,15 @@ class MessageChannel {
         return receivedMsg;
     }
 
+    template <typename PROCESS_FUNC_T>
+    void run(PROCESS_FUNC_T process)
+    {
+        while (1) {
+            send(process(receive<Command>()));
+        }
+        // const Command cmd = channel.receive<Command>();
+    }
+
   private:
     // void receive(std::uint8_t b) noexcept
     // {
