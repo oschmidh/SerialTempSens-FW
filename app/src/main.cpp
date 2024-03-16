@@ -1,10 +1,10 @@
 #include <SerialTempSens_messages.h>
 
 #include "WriteBuffer.hpp"
+#include "SensorService.hpp"
 
 #include <ReadBufferFixedSize.h>
 
-#include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/drivers/sensor.h>
@@ -57,32 +57,17 @@ void serial_cb(const struct device* dev, void* user_data)
     }
 }
 
-void fetchSensors()
-{
-    constexpr std::array<const device* const, 3> tempSensors{
-        DEVICE_DT_GET(DT_NODELABEL(sens0)),
-        DEVICE_DT_GET(DT_NODELABEL(sens1)),
-        DEVICE_DT_GET(DT_NODELABEL(sens2)),
-    };
-
-    for (const auto sensor : tempSensors) {
-        sensor_sample_fetch(sensor);
-    }
-
-    k_sleep(K_MSEC(500));    // TODO define in KConfig
-}
-
-static constexpr int prio = 0;
-static constexpr unsigned int stacksize = 256;    // TODO enable mpu and HW stack protection
-K_THREAD_DEFINE(sensorThread, stacksize, fetchSensors, NULL, NULL, NULL, prio, 0, 0);
-
 int main()
 {
-    constexpr std::array<const device* const, 3> tempSensors{
-        DEVICE_DT_GET(DT_NODELABEL(sens0)),
-        DEVICE_DT_GET(DT_NODELABEL(sens1)),
-        DEVICE_DT_GET(DT_NODELABEL(sens2)),
-    };
+    SensorService sensors;
+
+    sensors.init();
+    sensors.start();
+
+    if (!device_is_ready(uart_dev)) {
+        printk("UART device not found!");
+        return 0;
+    }
 
     if (uart_irq_callback_user_data_set(uart_dev, serial_cb, NULL) != 0) {
         return 0;
@@ -95,16 +80,8 @@ int main()
         Command receivedCmd;
         if (receivedCmd.deserialize(readBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
 
-            if (receivedCmd.sensorId() >= tempSensors.size()) {
-                LOG_WRN("Invalid sensor ID received");
-                continue;
-            }
-
-            struct sensor_value temp;
-            sensor_channel_get(tempSensors[receivedCmd.sensorId()], SENSOR_CHAN_AMBIENT_TEMP, &temp);
-
             Reply rply;
-            rply.set_temperature(sensor_value_to_milli(&temp));
+            rply.set_temperature(sensors.get(receivedCmd.sensorId()));
 
             WriteBuffer writeBuf;
             if (rply.serialize(writeBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
