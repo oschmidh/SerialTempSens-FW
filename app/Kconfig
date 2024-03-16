@@ -10,6 +10,14 @@ menu "Zephyr"
 source "Kconfig.zephyr"
 endmenu
 
+config SENSORSERVICE_FETCH_INTERVAL
+    int "Sensor fetch interval [ms]"
+    default 500
+
+config SENSORSERVICE_STACKSIZE
+    int "Sensorservice thread stack size"
+    default 256
+
 module = APP
 module-str = APP
 source "subsys/logging/Kconfig.template.log_config"
