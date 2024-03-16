@@ -1,8 +1,8 @@
 #ifndef SERIALTEMPSENS_FW_APP_INCLUDE_SENSORSERVICE_H
 #define SERIALTEMPSENS_FW_APP_INCLUDE_SENSORSERVICE_H
 
-#include "Sensor.hpp"
-
+#include <zephyr/device.h>
+#include <zephyr/drivers/sensor.h>
 #include <zephyr/kernel.h>
 
 #include <array>
@@ -16,11 +16,12 @@ class SensorService {
 
     void init() noexcept
     {
-        // TODO check readyness for all sensors
-        // if (!device_is_ready(uart_dev)) {
-        //     printk("UART device not found!");
-        //     return 0;
-        // }
+        for (const auto sensor : _tempSensors) {
+            if (!device_is_ready(sensor)) {
+                printk("Sensor not ready\n");    // TODO replace with logs
+                return;
+            }
+        }
 
         _threadId = k_thread_create(&_thread, threadStack, K_THREAD_STACK_SIZEOF(threadStack), threadEntry, this,
                                     nullptr, nullptr, prio, 0, K_FOREVER);
@@ -36,13 +37,17 @@ class SensorService {
             return 0;    // TODO return error code
         }
 
-        return _tempSensors[idx].getTempMilli();
+        struct sensor_value temp;
+        sensor_channel_get(_tempSensors[idx], SENSOR_CHAN_AMBIENT_TEMP, &temp);
+        return sensor_value_to_milli(&temp);
     }
 
   private:
-    static constexpr std::array<Sensor, 3> _tempSensors{{{DEVICE_DT_GET(DT_NODELABEL(sens0))},
-                                                         {DEVICE_DT_GET(DT_NODELABEL(sens1))},
-                                                         {DEVICE_DT_GET(DT_NODELABEL(sens2))}}};
+    static constexpr std::array<const device* const, 3> _tempSensors{
+        DEVICE_DT_GET(DT_NODELABEL(sens0)),
+        DEVICE_DT_GET(DT_NODELABEL(sens1)),
+        DEVICE_DT_GET(DT_NODELABEL(sens2)),
+    };
 
     static constexpr int prio = 0;
 
@@ -51,8 +56,9 @@ class SensorService {
         while (1) {
 
             for (const auto sensor : _tempSensors) {
-                sensor.fetch();
+                sensor_sample_fetch(sensor);
             }
+            printk("fetched sensors\n");
 
             k_sleep(K_MSEC(CONFIG_SENSORSERVICE_FETCH_INTERVAL));
         }
