@@ -1,0 +1,47 @@
+/ {
+    chosen {
+        zephyr,com-uart = &usart2;
+    };
+
+    sens0: sens0 {
+        compatible = "ntc-thermistor-generic";
+        zephyr,compensation-table = <(-25) 101898>,
+                     <(-15) 59605>,
+                     <(-5) 36289>,
+                     <(5) 22896>,
+                     <(15) 14915>,
+                     <(25) 10000>,
+                     <(35) 6880>,
+                     <(45) 4846>,
+                     <(55) 3487>,
+                     <(65) 2559>,
+                     <(75) 1911>,
+                     <(85) 1451>,
+                     <(95) 1118>,
+                     <(105) 873>,
+                     <(115) 691>,
+                     <(125) 553>;
+        io-channels = <&adc1 5>;
+        pullup-uv = <3300000>;
+        pullup-ohm = <8200>;
+        pulldown-ohm = <0>;
+    };
+};
+
+&adc1 {
+    pinctrl-0 = <&adc1_in5_pa0>;
+    pinctrl-names = "default";
+    st,adc-clock-source = <SYNC>;
+    st,adc-prescaler = <1>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    status = "okay";
+
+    channel@5 {
+        reg = <5>;
+        zephyr,gain = "ADC_GAIN_1";
+        zephyr,reference = "ADC_REF_INTERNAL";
+        zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+        zephyr,resolution = <12>;
+    };
+};

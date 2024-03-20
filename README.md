@@ -34,7 +34,7 @@ west build -b $BOARD app
 
 where `$BOARD` is the target board.
 
-Currently, `serial_temp_sens` is the only supported board.
+Currently, `serial_temp_sens` and `nucleo_l432kc` are the only supported boards.
 
 A sample debug configuration is also provided. To apply it, run the following
 command:
