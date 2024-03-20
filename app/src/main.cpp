@@ -58,7 +58,11 @@ void serial_cb(const struct device* dev, void* user_data)
 
 int main()
 {
-    constexpr const device* const sens0_dev = DEVICE_DT_GET(DT_NODELABEL(sens0));
+    constexpr std::array<const device* const, 3> tempSensors{
+        DEVICE_DT_GET(DT_NODELABEL(sens0)),
+        DEVICE_DT_GET(DT_NODELABEL(sens1)),
+        DEVICE_DT_GET(DT_NODELABEL(sens2)),
+    };
 
     if (!device_is_ready(uart_dev)) {
         printk("UART device not found!");
@@ -76,12 +80,17 @@ int main()
         Command receivedCmd;
         if (receivedCmd.deserialize(readBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
 
-            sensor_sample_fetch(sens0_dev);
+            if (receivedCmd.sensorId() >= tempSensors.size()) {
+                LOG_WRN("Invalid sensor ID received");
+                continue;
+            }
+            sensor_sample_fetch(tempSensors[receivedCmd.sensorId()]);
+
             struct sensor_value temp;
-            sensor_channel_get(sens0_dev, SENSOR_CHAN_AMBIENT_TEMP, &temp);
-            int tempMilliDegC = sensor_value_to_milli(&temp);
+            sensor_channel_get(tempSensors[receivedCmd.sensorId()], SENSOR_CHAN_AMBIENT_TEMP, &temp);
+
             Reply rply;
-            rply.set_temperature(tempMilliDegC);
+            rply.set_temperature(sensor_value_to_milli(&temp));
 
             WriteBuffer writeBuf;
             if (rply.serialize(writeBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
