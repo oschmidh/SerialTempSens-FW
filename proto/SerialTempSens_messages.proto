@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message Command { uint32 sensorId = 1; }
+
+message Reply { int32 temperature = 2; }

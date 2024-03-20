@@ -1,6 +1,7 @@
 /dts-v1/;
 #include <st/g0/stm32g0b1Xc.dtsi>
 #include <st/g0/stm32g0b1k(b-c-e)tx-pinctrl.dtsi>
+#include <zephyr/dt-bindings/adc/adc.h>
 
 / {
 	model = "Serial TempSens";
@@ -15,7 +16,29 @@
 		zephyr,code-partition = &slot0_partition;
 	};
 
-
+	sens0: sens0 {
+		compatible = "ntc-thermistor-generic";
+		zephyr,compensation-table = <(-25) 101898>,
+                     <(-15) 59605>,
+                     <(-5) 36289>,
+                     <(5) 22896>,
+                     <(15) 14915>,
+                     <(25) 10000>,
+                     <(35) 6880>,
+                     <(45) 4846>,
+                     <(55) 3487>,
+                     <(65) 2559>,
+                     <(75) 1911>,
+                     <(85) 1451>,
+                     <(95) 1118>,
+                     <(105) 873>,
+                     <(115) 691>,
+                     <(125) 553>;
+		io-channels = <&adc1 0>;
+		pullup-uv = <3300000>;
+		pullup-ohm = <8200>;
+		pulldown-ohm = <0>;
+	};
 };
 
 &clk_hsi {
@@ -69,11 +92,37 @@ zephyr_udc0: &usb {
 };
 
 &adc1 {
-	pinctrl-0 = <&adc1_in0_pa0 &adc1_in1_pa1>;
+	pinctrl-0 = <&adc1_in0_pa0 &adc1_in1_pa1 &adc1_in2_pa2>;
 	pinctrl-names = "default";
 	st,adc-clock-source = <SYNC>;
 	st,adc-prescaler = <4>;
+	#address-cells = <1>;
+    #size-cells = <0>;
 	status = "okay";
+
+	channel@0 {
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1_6";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@1 {
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1_6";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@2 {
+		reg = <2>;
+		zephyr,gain = "ADC_GAIN_1_6";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
 };
 
 &iwdg {
