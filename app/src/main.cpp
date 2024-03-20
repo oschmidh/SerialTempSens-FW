@@ -57,6 +57,25 @@ void serial_cb(const struct device* dev, void* user_data)
     }
 }
 
+void fetchSensors()
+{
+    constexpr std::array<const device* const, 3> tempSensors{
+        DEVICE_DT_GET(DT_NODELABEL(sens0)),
+        DEVICE_DT_GET(DT_NODELABEL(sens1)),
+        DEVICE_DT_GET(DT_NODELABEL(sens2)),
+    };
+
+    for (const auto sensor : tempSensors) {
+        sensor_sample_fetch(sensor);
+    }
+
+    k_sleep(K_MSEC(500));    // TODO define in KConfig
+}
+
+static constexpr int prio = 0;
+static constexpr unsigned int stacksize = 256;    // TODO enable mpu and HW stack protection
+K_THREAD_DEFINE(sensorThread, stacksize, fetchSensors, NULL, NULL, NULL, prio, 0, 0);
+
 int main()
 {
     constexpr std::array<const device* const, 3> tempSensors{
@@ -80,7 +99,6 @@ int main()
                 LOG_WRN("Invalid sensor ID received");
                 continue;
             }
-            sensor_sample_fetch(tempSensors[receivedCmd.sensorId()]);
 
             struct sensor_value temp;
             sensor_channel_get(tempSensors[receivedCmd.sensorId()], SENSOR_CHAN_AMBIENT_TEMP, &temp);
