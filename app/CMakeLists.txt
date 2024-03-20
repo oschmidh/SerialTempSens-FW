@@ -38,4 +38,5 @@ PUBLIC
 target_sources(app
 PRIVATE
     src/main.cpp
+    src/SensorService.cpp
 )
