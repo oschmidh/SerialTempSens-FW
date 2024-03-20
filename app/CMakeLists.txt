@@ -9,4 +9,14 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(app LANGUAGES CXX)
 
-target_sources(app PRIVATE src/main.cpp)
+target_include_directories(app PRIVATE inc)
+
+target_link_libraries(app
+PUBLIC
+    embeddedProto
+)
+
+target_sources(app
+PRIVATE
+    src/main.cpp
+)
