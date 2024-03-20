@@ -80,8 +80,13 @@ int main()
         Command receivedCmd;
         if (receivedCmd.deserialize(readBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
 
+            const auto ret = sensors.get(receivedCmd.sensorId());
+            if (!ret.has_value()) {
+                continue;
+            }
+
             Reply rply;
-            rply.set_temperature(sensors.get(receivedCmd.sensorId()));
+            rply.set_temperature(ret.value());
 
             WriteBuffer writeBuf;
             if (rply.serialize(writeBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
