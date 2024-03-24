@@ -9,7 +9,7 @@
 
 #include <zephyr/device.h>
 #include <zephyr/drivers/sensor.h>
-// #include <zephyr/usb/usb_device.h>
+#include <zephyr/usb/usb_device.h>
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
@@ -38,11 +38,20 @@ int main()
     uart.enableRx();
 
     while (1) {
-        const std::uint8_t numBytes = rxBuf.pull();
+        const auto numBytes = rxBuf.pull();
+        if (!numBytes.has_value()) {
+            LOG_WRN("failed to pull from uart rx buffer");
+            continue;
+        }
 
         ReadBufferType readBuf;
-        while (readBuf.get_size() < numBytes) {
-            readBuf.push(rxBuf.pull());
+        while (readBuf.get_size() < numBytes.value()) {
+            const auto data = rxBuf.pull();
+            if (!data.has_value()) {
+                LOG_WRN("failed to pull from uart rx buffer");
+                continue;
+            }
+            readBuf.push(data.value());
         }
 
         Command receivedCmd;
