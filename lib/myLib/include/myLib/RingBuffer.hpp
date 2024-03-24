@@ -50,7 +50,7 @@ class RingIndex {
     operator std::size_t() const noexcept { return _idx; }
 
   private:
-    std::size_t _idx;
+    std::size_t _idx{};
 };
 
 }    // namespace internal
