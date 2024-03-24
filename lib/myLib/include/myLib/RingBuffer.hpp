@@ -3,6 +3,7 @@
 
 #include "Spinlock.hpp"
 
+#include <optional>
 #include <array>
 #include <cstdint>
 
@@ -83,12 +84,12 @@ class RingBuffer {
         return true;
     }
 
-    constexpr DATA_T pull() noexcept
+    constexpr std::optional<DATA_T> pull() noexcept
     {
         SpinlockGuard lock(_lock);
 
         if (_isEmpty()) {
-            return {};    // TODO what to do here?
+            return std::nullopt;
         }
         _full = false;
         return _buf[_tail++];
