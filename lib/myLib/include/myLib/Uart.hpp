@@ -1,48 +1,25 @@
 #ifndef SERIALTEMPSENS_FW_APP_INCLUDE_UART_H
 #define SERIALTEMPSENS_FW_APP_INCLUDE_UART_H
 
-#include <myLib/RingBuffer.hpp>
-#include <myLib/Semaphore.hpp>
-
 #include <zephyr/device.h>
 #include <zephyr/drivers/uart.h>
 
 #include <cstdint>
 #include <span>
 
-template <std::size_t SIZE_V>
-class UartBuffer {
-  public:
-    using DataType = std::uint8_t;
+namespace Concept {
 
-    DataType pull() noexcept
-    {
-        _sem.take();
-        const DataType val = _buf.pull();
-        return val;
-    }
+template <typename BUFFER_T>
+concept UartBuffer = requires(BUFFER_T buf, std::uint8_t c) { buf.push(c); };
 
-    bool push(DataType b) noexcept
-    {
-        if (!_buf.push(b)) {
-            return false;
-        }
+}    // namespace Concept
 
-        _sem.give();
-        return true;
-    }
-
-  private:
-    myLib::Semaphore _sem{SIZE_V};
-    myLib::RingBuffer<DataType, SIZE_V> _buf;
-};
-
-template <typename BUFFER_T>    // TODO concept
+template <Concept::UartBuffer RX_BUFFER_T>
 class Uart {
   public:
-    constexpr Uart(const device* const dev, BUFFER_T& recvBuf) noexcept
+    constexpr Uart(const device* const dev, RX_BUFFER_T& rxBuf) noexcept
      : _dev(dev)
-     , _recvBuf(recvBuf)
+     , _rxBuf(rxBuf)
     { }
 
     bool init() noexcept
@@ -62,10 +39,10 @@ class Uart {
     void sendPolling(std::span<const std::uint8_t> data) noexcept
     {
         for (std::uint8_t d : data) {
-            // printk("poll out %c\n", d + '0');
-            uart_poll_out(_dev, d);
+            sendPolling(d);
         }
     }
+    void sendPolling(std::uint8_t byte) noexcept { uart_poll_out(_dev, byte); }
 
     void enableRx() const noexcept { uart_irq_rx_enable(_dev); }
     void disableRx() const noexcept { uart_irq_rx_disable(_dev); }
@@ -87,7 +64,7 @@ class Uart {
         std::uint8_t c;
         while (uart_fifo_read(_dev, &c, 1) == 1) {
             // printk("rec:%c\n", c + '0');
-            _recvBuf.push(c);
+            _rxBuf.push(c);
         }
     }
 
@@ -121,7 +98,7 @@ class Uart {
     }
 
     const device* const _dev;
-    BUFFER_T& _recvBuf;
+    RX_BUFFER_T& _rxBuf;
 };
 
 #endif    // SERIALTEMPSENS_FW_APP_INCLUDE_UART_H
