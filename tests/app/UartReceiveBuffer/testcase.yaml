@@ -1,0 +1,8 @@
+common:
+  tags: extensibility
+  integration_platforms:
+    - serial_temp_sens
+    - native_posix
+    - qemu_cortex_m0
+tests:
+  app.serialTempSens: {}
