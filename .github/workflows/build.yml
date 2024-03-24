@@ -2,34 +2,52 @@ name: Build
 
 on:
   push:
+    branches:
+      - main
   pull_request:
-  schedule:
-    - cron: "0 0 * * *"
+    branches:
+      - main
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-22.04
     container: ghcr.io/zephyrproject-rtos/ci:v0.26.5
     env:
       CMAKE_PREFIX_PATH: /opt/toolchains
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: app
 
-      - name: Initialize
+      - name: Initialize workspace
         working-directory: app
         run: |
           west init -l .
           west update -o=--depth=1 -n
 
+      - name: Install tools
+        working-directory: modules/EmbeddedProto
+        run: |
+          sudo apt update
+          sudo apt install -y unzip curl python3.10-venv
+          curl -L -O https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip
+          sudo unzip -o protoc-25.1-linux-x86_64.zip -d /usr/local
+          python setup.py
+
       - name: Build firmware
         working-directory: app
         run: |
-          west twister -T app -v --inline-logs --integration
+          west build -b serial_temp_sens app
 
       # - name: Twister Tests
       #   working-directory: app
       #   run: |
-      #     west twister -T tests --integration
+      #     west twister -T tests --inline-logs --integration
+
+      - name: Archive MCU image
+        uses: actions/upload-artifact@v4
+        with:
+          name: SerialTempSens_image
+          path: |
+            ./app/build/zephyr/zephyr.hex
