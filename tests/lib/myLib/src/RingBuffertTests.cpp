@@ -35,10 +35,10 @@ ZTEST(ringBuffer_tests, test_index_increment_wraparound)
     static constexpr std::size_t size = 3;
     myLib::internal::RingIndex<size> idx;
 
-    for (int i = 0; i < size; ++i) {
+    for (unsigned int i = 0; i < (size - 1); ++i) {
         ++idx;
     }
-    zassert_equal(idx, size - 1);
+    zassert_equal(idx, size - 1, "is: %d", idx);
     ++idx;
     zassert_equal(idx, 0);
 }
@@ -48,7 +48,7 @@ ZTEST(ringBuffer_tests, test_index_increment_wraparound_powerOf2)    // TODO ??
     static constexpr std::size_t size = 8;
     myLib::internal::RingIndex<size> idx;
 
-    for (int i = 0; i < size; ++i) {
+    for (unsigned int i = 0; i < (size - 1); ++i) {
         ++idx;
     }
     zassert_equal(idx, size - 1);
@@ -76,6 +76,16 @@ ZTEST(ringBuffer_tests, test_buffer_empty)
 
     buf.pull();
     zassert_true(buf.isEmpty());
+}
+
+ZTEST(ringBuffer_tests, test_empty_pull)
+{
+    myLib::RingBuffer<int, 8> buf;
+
+    zassert_true(buf.isEmpty());
+
+    const auto ret = buf.pull();
+    zassert_false(ret.has_value());
 }
 
 ZTEST(ringBuffer_tests, test_buffer_full)
@@ -115,7 +125,7 @@ ZTEST(ringBuffer_tests, test_items_order)
 
     std::array<int, 4> actual;
     for (int& v : actual) {
-        v = buf.pull();
+        v = buf.pull().value_or(0);
     }
 
     zassert_mem_equal(expected.data(), actual.data(), expected.size());
