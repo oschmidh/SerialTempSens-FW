@@ -4,6 +4,7 @@
 #include <myLib/RingBuffer.hpp>
 #include <myLib/Semaphore.hpp>
 
+#include <optional>
 #include <cstdint>
 
 template <std::size_t SIZE_V>
@@ -11,11 +12,10 @@ class UartReceiveBuffer {
   public:
     using DataType = std::uint8_t;
 
-    DataType pull() noexcept
+    std::optional<DataType> pull() noexcept
     {
         _sem.take();
-        const DataType val = _buf.pull();
-        return val;
+        return _buf.pull();
     }
 
     bool push(DataType b) noexcept
