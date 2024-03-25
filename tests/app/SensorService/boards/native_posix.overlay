@@ -1,0 +1,13 @@
+/ {
+    sens0: sens0 {
+		compatible = "zephyr,sensor-emul";
+	};
+
+	sens1: sens1 {
+		compatible = "zephyr,sensor-emul";
+	};
+
+	sens2: sens2 {
+		compatible = "zephyr,sensor-emul";
+	};
+};
