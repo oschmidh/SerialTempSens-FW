@@ -1,0 +1,3 @@
+config MYLIB
+    bool "MyLib"
+    select REQUIRES_FULL_LIBCPP

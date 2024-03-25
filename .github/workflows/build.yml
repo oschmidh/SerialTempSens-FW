@@ -42,10 +42,10 @@ jobs:
         run: |
           west build -b serial_temp_sens app
 
-      # - name: Twister Tests
-      #   working-directory: app
-      #   run: |
-      #     west twister -T tests --inline-logs --integration
+      - name: Twister Tests
+        working-directory: app
+        run: |
+          west twister -T tests --inline-logs --integration
 
       - name: Archive MCU image
         uses: actions/upload-artifact@v4
