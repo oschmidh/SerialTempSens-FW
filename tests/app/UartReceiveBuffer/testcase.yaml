@@ -4,4 +4,4 @@ common:
     - serial_temp_sens
     - native_posix
 tests:
-  app.serialTempSens: {}
+  app.uartReceiveBuffer: {}
