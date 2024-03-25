@@ -7,7 +7,7 @@ target_include_directories(app PRIVATE include)
 
 if (WIN32)
     set(PROTC_PLUGIN protoc-gen-eams=protoc-gen-eams.bat)
-elseif(UNIX)
+else()
     set(PROTC_PLUGIN protoc-gen-eams)
 endif()
 
