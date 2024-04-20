@@ -79,14 +79,17 @@ int main()
 
         Command receivedCmd;
         if (receivedCmd.deserialize(readBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
+            LOG_DBG("command received");
+
+            Reply rply;
 
             const auto ret = sensors.get(receivedCmd.sensorId());
             if (!ret.has_value()) {
-                continue;
+                LOG_ERR("no sensor connected on channel %d", receivedCmd.sensorId());
+                rply.set_temperature(0);
+            } else {
+                rply.set_temperature(ret.value());
             }
-
-            Reply rply;
-            rply.set_temperature(ret.value());
 
             WriteBuffer writeBuf;
             if (rply.serialize(writeBuf) == ::EmbeddedProto::Error::NO_ERRORS) {
