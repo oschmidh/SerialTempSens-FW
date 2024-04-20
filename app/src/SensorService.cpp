@@ -40,7 +40,7 @@ auto SensorService::get(std::size_t idx) const noexcept -> std::expected<int, Se
 
     const int val = sensor_value_to_milli(&temp);
 
-    if (val == -25000) {    // TODO arbitrary number, calculate somehow
+    if (val == -25000) {
         return std::unexpected(SensorError::NotPresent);
     }
 
