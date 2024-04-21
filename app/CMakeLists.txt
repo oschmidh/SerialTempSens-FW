@@ -5,7 +5,7 @@ project(app LANGUAGES CXX)
 
 target_include_directories(app PRIVATE include)
 
-if (WIN32)
+if (CMAKE_HOST_WIN32)
     set(PROTC_PLUGIN protoc-gen-eams=protoc-gen-eams.bat)
 else()
     set(PROTC_PLUGIN protoc-gen-eams)
@@ -26,7 +26,7 @@ RESULT_VARIABLE
     PROTOC_STATUS
 )
 
-if(DEFINED ${PROTOC_STATUS})
+if(NOT PROTOC_STATUS EQUAL 0)
     message(SEND_ERROR "Failed to generate protobuf headers: ${PROTOC_ERROR}")
 endif()
 
