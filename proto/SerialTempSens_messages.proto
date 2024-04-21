@@ -2,8 +2,10 @@ syntax = "proto3";
 
 enum ErrorCode {
     NoError = 0;
-    SensorOpen = 1;
-    InvalidSensorId = 2;
+    GenericError = 1;
+    SensorOpen = 2;
+    InvalidSensorId = 3;
+    IoError = 4;
 }
 
 message Command { uint32 sensorId = 1; }

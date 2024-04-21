@@ -69,12 +69,12 @@ int main()
                         break;
 
                     case SensorError::NotPresent:
-                        rply.set_error(ErrorCode::NotPresent);
+                        rply.set_error(ErrorCode::SensorOpen);
                         LOG_ERR("no sensor connected on channel %d", receivedCmd.sensorId());
                         break;
 
                     case SensorError::ReadFail:
-                        rply.set_error(ErrorCode::NotPresent);
+                        rply.set_error(ErrorCode::IoError);
                         LOG_ERR("Failed to read sensor");
                         break;
                 }
