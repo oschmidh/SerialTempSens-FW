@@ -5,30 +5,14 @@
 
 namespace myLib {
 
-using SpinlockKey = k_spinlock_key_t;
-
 class Spinlock {
   public:
-    SpinlockKey lock() noexcept { return k_spin_lock(&_lock); }
-    void unlock(SpinlockKey key) noexcept { k_spin_unlock(&_lock, key); }
+    void lock() noexcept { m_key = k_spin_lock(&_lock); }
+    void unlock() noexcept { k_spin_unlock(&_lock, m_key); }
 
   private:
+    k_spinlock_key_t m_key{};
     k_spinlock _lock{};
-};
-
-class SpinlockGuard {
-  public:
-    SpinlockGuard(Spinlock& lock) noexcept
-     : _lock(lock)
-    {
-        _key = _lock.lock();
-    }
-    SpinlockGuard(const SpinlockGuard&) = delete;
-    ~SpinlockGuard() noexcept { _lock.unlock(_key); }
-
-  private:
-    Spinlock& _lock;
-    SpinlockKey _key;
 };
 
 }    // namespace myLib

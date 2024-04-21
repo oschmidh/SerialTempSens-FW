@@ -30,7 +30,7 @@ class UartReceiveBuffer {
 
   private:
     myLib::Semaphore _sem{SIZE_V};
-    myLib::RingBuffer<DataType, SIZE_V> _buf;
+    myLib::RingBuffer<DataType, SIZE_V, myLib::Policies::ThreadSafe<myLib::Spinlock>> _buf;
 };
 
 #endif    // SERIALTEMPSENS_FW_APP_INCLUDE_UARTRECEIVEBUFFER_H
