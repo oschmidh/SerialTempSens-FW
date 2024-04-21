@@ -9,11 +9,31 @@
 
 namespace myLib {
 
+namespace Concepts {
+
+template <typename T>
+concept Lockable = requires(T lock) {
+    lock.lock();
+    lock.unlock();
+};
+
+}    // namespace Concepts
+
 namespace internal {
 
 template <std::size_t SIZE_V>    // TODO special case for sizes that are powers of 2: wraparound can be simplified
 class RingIndex {
   public:
+    std::size_t operator-(std::size_t val)
+    {
+        if (_idx < val) {
+            val -= _idx;
+            return SIZE_V - val;
+        } else {
+            return _idx - val;
+        }
+    }
+
     RingIndex& operator++()    // prefix
     {
         // _idx = ++_idx % SIZE_V;
@@ -53,55 +73,110 @@ class RingIndex {
     std::size_t _idx{};
 };
 
+template <Concepts::Lockable LOCK_T>
+class LockGuard {
+  public:
+    LockGuard(LOCK_T& lock) noexcept
+     : _lock(lock)
+    {
+        _lock.lock();
+    }
+    LockGuard(const LockGuard&) = delete;
+    ~LockGuard() noexcept { _lock.unlock(); }
+
+  private:
+    LOCK_T& _lock;
+};
+
+}    // namespace internal
+
+namespace Policies {
+
+template <Concepts::Lockable LOCK_T>
+class ThreadSafe {
+
+  public:
+    // using LockGuardType = std::lock_guard<LOCK_T>;
+    using LockGuardType = internal::LockGuard<LOCK_T>;
+
+    LockGuardType makeLockGuard() const noexcept { return {m_lock}; }
+
+  private:
+    mutable LOCK_T m_lock;
+};
+
+}    // namespace Policies
+
+namespace internal {
+
+class NonThreadSafe {
+  public:
+    constexpr auto makeLockGuard() const noexcept { return *this; }
+};
+
+template <template <typename> typename, typename, typename...>
+struct GetPolicy;
+
+template <template <typename> typename POLICY_T, typename DEFAULT_T, typename FIRST_T, typename... REST_Ts>
+struct GetPolicy<POLICY_T, DEFAULT_T, FIRST_T, REST_Ts...> {
+    using Type = typename GetPolicy<POLICY_T, DEFAULT_T, REST_Ts...>::Type;
+};
+
+template <template <typename> typename POLICY_T, typename DEFAULT_T, typename T, typename... REST_Ts>
+struct GetPolicy<POLICY_T, DEFAULT_T, POLICY_T<T>, REST_Ts...> {
+    using Type = POLICY_T<T>;
+};
+
+template <template <typename> typename POLICY_T, typename DEFAULT_T>
+struct GetPolicy<POLICY_T, DEFAULT_T> {
+    using Type = DEFAULT_T;
+};
+
 }    // namespace internal
 
 // TODO add overwrite policy?
-template <typename DATA_T, std::size_t SIZE_V>    // TODO add tread-safe policy?
+template <typename DATA_T, std::size_t SIZE_V, typename... POLICY_Ts>
+// class RingBuffer final : private POLICY_Ts... {
 class RingBuffer {
   public:
+    consteval std::size_t size() const noexcept { return SIZE_V - 1; }
+
     constexpr bool isEmpty() const noexcept
     {
-        SpinlockGuard lock(_lock);
-        return _isEmpty();
+        auto lockguard = _threadSafety.makeLockGuard();
+
+        return _tail == _head;
     }
+
     constexpr bool isFull() const noexcept
     {
-        SpinlockGuard lock(_lock);
-        return _isFull();
+        auto lockguard = _threadSafety.makeLockGuard();
+
+        return _tail == _head - 1;
     }
 
     constexpr bool push(DATA_T b) noexcept
     {
-        SpinlockGuard lock(_lock);
-
-        if (_isFull()) {
+        if (isFull()) {
             return false;
         }
         _buf[_head++] = b;
-        if (_tail == _head) {
-            _full = true;
-        }
         return true;
     }
 
     constexpr std::optional<DATA_T> pull() noexcept
     {
-        SpinlockGuard lock(_lock);
-
-        if (_isEmpty()) {
+        if (isEmpty()) {
             return std::nullopt;
         }
-        _full = false;
         return _buf[_tail++];
     }
 
   private:
-    // not thread-safe:
-    constexpr bool _isEmpty() const noexcept { return (_tail == _head) && !_isFull(); }
-    constexpr bool _isFull() const noexcept { return _full; }
+    using ThreadSafePolicyType =
+        typename internal::GetPolicy<Policies::ThreadSafe, internal::NonThreadSafe, POLICY_Ts...>::Type;
 
-    mutable Spinlock _lock{};
-    bool _full{};
+    ThreadSafePolicyType _threadSafety{};
     internal::RingIndex<SIZE_V> _tail{};
     internal::RingIndex<SIZE_V> _head{};
     std::array<DATA_T, SIZE_V> _buf;
