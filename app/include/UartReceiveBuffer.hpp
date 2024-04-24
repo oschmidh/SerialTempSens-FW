@@ -2,6 +2,7 @@
 #define SERIALTEMPSENS_FW_APP_INCLUDE_UARTRECEIVEBUFFER_H
 
 #include <myLib/RingBuffer.hpp>
+#include <myLib/Spinlock.hpp>
 #include <myLib/Semaphore.hpp>
 
 #include <optional>
