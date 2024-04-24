@@ -1,8 +1,6 @@
 #ifndef SERIALTEMPSENS_FW_LIB_MYLIB_INCLUDE_MYLIB_RINGBUFFER_H
 #define SERIALTEMPSENS_FW_LIB_MYLIB_INCLUDE_MYLIB_RINGBUFFER_H
 
-#include "Spinlock.hpp"
-
 #include <optional>
 #include <array>
 #include <cstdint>
@@ -136,21 +134,20 @@ struct GetPolicy<POLICY_T, DEFAULT_T> {
 
 // TODO add overwrite policy?
 template <typename DATA_T, std::size_t SIZE_V, typename... POLICY_Ts>
-// class RingBuffer final : private POLICY_Ts... {
-class RingBuffer {
+class RingBuffer : private internal::GetPolicy<Policies::ThreadSafe, internal::NonThreadSafe, POLICY_Ts...>::Type {
   public:
     consteval std::size_t size() const noexcept { return SIZE_V - 1; }
 
     constexpr bool isEmpty() const noexcept
     {
-        auto lockguard = _threadSafety.makeLockGuard();
+        auto lockguard = this->makeLockGuard();
 
         return _tail == _head;
     }
 
     constexpr bool isFull() const noexcept
     {
-        auto lockguard = _threadSafety.makeLockGuard();
+        auto lockguard = this->makeLockGuard();
 
         return _tail == _head - 1;
     }
@@ -173,10 +170,6 @@ class RingBuffer {
     }
 
   private:
-    using ThreadSafePolicyType =
-        typename internal::GetPolicy<Policies::ThreadSafe, internal::NonThreadSafe, POLICY_Ts...>::Type;
-
-    ThreadSafePolicyType _threadSafety{};
     internal::RingIndex<SIZE_V> _tail{};
     internal::RingIndex<SIZE_V> _head{};
     std::array<DATA_T, SIZE_V> _buf;
