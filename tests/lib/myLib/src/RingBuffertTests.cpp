@@ -90,7 +90,7 @@ ZTEST(ringBuffer_tests, test_empty_pull)
 
 ZTEST(ringBuffer_tests, test_buffer_full)
 {
-    myLib::RingBuffer<int, 2> buf;
+    myLib::RingBuffer<int, 3> buf;
 
     zassert_false(buf.isFull());
 
