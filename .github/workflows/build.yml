@@ -13,7 +13,7 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-22.04
-    container: ghcr.io/zephyrproject-rtos/ci:v0.26.5
+    container: ghcr.io/zephyrproject-rtos/ci:v0.26.12
     env:
       CMAKE_PREFIX_PATH: /opt/toolchains
     steps:
