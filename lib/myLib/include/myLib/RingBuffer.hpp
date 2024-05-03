@@ -1,6 +1,7 @@
 #ifndef SERIALTEMPSENS_FW_LIB_MYLIB_INCLUDE_MYLIB_RINGBUFFER_H
 #define SERIALTEMPSENS_FW_LIB_MYLIB_INCLUDE_MYLIB_RINGBUFFER_H
 
+#include <mutex>
 #include <optional>
 #include <array>
 #include <cstdint>
@@ -71,21 +72,6 @@ class RingIndex {
     std::size_t _idx{};
 };
 
-template <Concepts::Lockable LOCK_T>
-class LockGuard {
-  public:
-    LockGuard(LOCK_T& lock) noexcept
-     : _lock(lock)
-    {
-        _lock.lock();
-    }
-    LockGuard(const LockGuard&) = delete;
-    ~LockGuard() noexcept { _lock.unlock(); }
-
-  private:
-    LOCK_T& _lock;
-};
-
 }    // namespace internal
 
 namespace Policies {
@@ -94,10 +80,9 @@ template <Concepts::Lockable LOCK_T>
 class ThreadSafe {
 
   public:
-    // using LockGuardType = std::lock_guard<LOCK_T>;
-    using LockGuardType = internal::LockGuard<LOCK_T>;
+    using LockGuardType = std::lock_guard<LOCK_T>;
 
-    LockGuardType makeLockGuard() const noexcept { return {m_lock}; }
+    LockGuardType makeLockGuard() const noexcept { return LockGuardType{m_lock}; }
 
   private:
     mutable LOCK_T m_lock;
