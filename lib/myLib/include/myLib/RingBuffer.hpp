@@ -136,7 +136,7 @@ struct GetPolicy<POLICY_T, DEFAULT_T> {
 template <typename DATA_T, std::size_t SIZE_V, typename... POLICY_Ts>
 class RingBuffer : private internal::GetPolicy<Policies::ThreadSafe, internal::NonThreadSafe, POLICY_Ts...>::Type {
   public:
-    consteval std::size_t size() const noexcept { return SIZE_V - 1; }
+    constexpr std::size_t size() const noexcept { return SIZE_V - 1; }
 
     constexpr bool isEmpty() const noexcept
     {
@@ -149,7 +149,7 @@ class RingBuffer : private internal::GetPolicy<Policies::ThreadSafe, internal::N
     {
         auto lockguard = this->makeLockGuard();
 
-        return _tail == _head - 1;
+        return _head - _tail == size();
     }
 
     constexpr bool push(DATA_T b) noexcept
