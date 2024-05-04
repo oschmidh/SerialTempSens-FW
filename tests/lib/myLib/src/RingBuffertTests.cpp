@@ -1,5 +1,7 @@
 #include <myLib/RingBuffer.hpp>
 
+#include <myLib/Mutex.hpp>
+
 #include <zephyr/ztest.h>
 
 ZTEST_SUITE(ringBuffer_tests, NULL, NULL, NULL, NULL, NULL);
@@ -180,4 +182,71 @@ ZTEST(ringBuffer_tests, test_items_order)
     }
 
     zassert_mem_equal(expected.data(), actual.data(), expected.size());
+}
+
+static constexpr int threadPrio = 0;
+static constexpr int stackSize = 1024;
+
+using RingbufferType = myLib::RingBuffer<int, 1024, myLib::Policies::ThreadSafe<myLib::Mutex>>;
+// using RingbufferType = myLib::RingBuffer<int, 1024>;
+
+void producerTask(void* buffer, void*, void*) noexcept
+{
+    RingbufferType* buf = reinterpret_cast<RingbufferType*>(buffer);
+
+    for (int i = 0; i < 8192; ++i) {
+        // for (int i = 0; i < 60000; ++i) {
+        // if (buf->isFull()) {
+        while (buf->isFull()) {
+            // k_busy_wait(7000);
+            k_yield();
+        }
+        // } else {
+
+        //     k_yield();
+        // }
+        zassert_true(buf->push(i));
+    }
+}
+
+void consumerTask(void* buffer, void*, void*) noexcept
+{
+    RingbufferType* buf = reinterpret_cast<RingbufferType*>(buffer);
+
+    for (int i = 0; i < 8192; ++i) {
+        // for (int i = 0; i < 30000; ++i) {
+        // if (buf->isEmpty()) {
+        while (buf->isEmpty()) {
+            // k_busy_wait(11000);
+            k_yield();
+            // printk("yield");
+        }
+        // } else {
+
+        //     k_yield();
+        // }
+
+        const auto ret = buf->pull();
+        zassert_true(ret.has_value());
+        // zassert_equal(ret.value(), i, "%d vs %d", ret.value(), i);
+    }
+}
+
+K_THREAD_STACK_DEFINE(producerStack, stackSize);
+K_THREAD_STACK_DEFINE(consumerStack, stackSize);
+
+ZTEST(ringBuffer_tests, test_thread_safety)
+{
+    RingbufferType buf;
+
+    k_thread producerThread{};
+    k_thread_create(&producerThread, producerStack, K_THREAD_STACK_SIZEOF(producerStack), producerTask,
+                    reinterpret_cast<void*>(&buf), NULL, NULL, threadPrio, 0, K_NO_WAIT);
+
+    k_thread consumerThread{};
+    k_thread_create(&consumerThread, consumerStack, K_THREAD_STACK_SIZEOF(consumerStack), consumerTask,
+                    reinterpret_cast<void*>(&buf), NULL, NULL, threadPrio, 0, K_NO_WAIT);
+
+    k_thread_join(&producerThread, K_FOREVER);
+    k_thread_join(&consumerThread, K_FOREVER);
 }
