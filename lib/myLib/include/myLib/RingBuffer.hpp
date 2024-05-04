@@ -130,12 +130,7 @@ class RingBuffer : private internal::GetPolicy<Policies::ThreadSafe, internal::N
         return _tail == _head;
     }
 
-    constexpr bool isFull() const noexcept
-    {
-        auto lockguard = this->makeLockGuard();
-
-        return _head - _tail == size();
-    }
+    constexpr bool isFull() const noexcept { return cnt() == size(); }
 
     constexpr bool push(DATA_T b) noexcept
     {
@@ -152,6 +147,19 @@ class RingBuffer : private internal::GetPolicy<Policies::ThreadSafe, internal::N
             return std::nullopt;
         }
         return _buf[_tail++];
+    }
+
+    constexpr unsigned int cnt() const noexcept
+    {
+
+        auto lockguard = this->makeLockGuard();
+        const int diff = _head - _tail;
+
+        if (diff >= 0) {
+            return static_cast<unsigned int>(diff);
+        } else {
+            return SIZE_V - std::abs(diff);
+        }
     }
 
   private:

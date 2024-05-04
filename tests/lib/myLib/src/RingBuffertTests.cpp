@@ -90,10 +90,12 @@ ZTEST(ringBuffer_tests, test_empty_pull)
 
 ZTEST(ringBuffer_tests, test_buffer_full)
 {
-    myLib::RingBuffer<int, 3> buf;
+    myLib::RingBuffer<int, 4> buf;
 
     zassert_false(buf.isFull());
 
+    buf.push(42);
+    zassert_false(buf.isFull());
     buf.push(42);
     zassert_false(buf.isFull());
 
@@ -102,15 +104,64 @@ ZTEST(ringBuffer_tests, test_buffer_full)
 
     buf.pull();
     zassert_false(buf.isFull());
+
+    buf.push(42);
+    zassert_true(buf.isFull());
+}
+
+ZTEST(ringBuffer_tests, test_cnt)
+{
+    myLib::RingBuffer<int, 8> buf;
+
+    unsigned int i = 0;
+    while (!buf.isFull()) {
+        zassert_equal(buf.cnt(), i);
+        buf.push(86);
+        ++i;
+    }
+
+    while (!buf.isEmpty()) {
+        zassert_equal(buf.cnt(), i, "%d vs %d", buf.cnt(), i);
+        buf.pull();
+        --i;
+    }
 }
 
 ZTEST(ringBuffer_tests, test_push_and_pull)
 {
-    myLib::RingBuffer<int, 8> buf;
+    {
+        myLib::RingBuffer<int, 8> buf;
 
-    zassert_true(buf.push(42));
+        zassert_true(buf.push(42));
+        zassert_equal(buf.pull(), 42);
+    }
+}
 
-    zassert_equal(buf.pull(), 42);
+ZTEST(ringBuffer_tests, test_wraparound)
+{
+    myLib::RingBuffer<int, 4> buf;
+
+    zassert_true(buf.isEmpty());
+
+    zassert_true(buf.push(5));
+    zassert_true(buf.push(30));
+    zassert_true(buf.push(186));
+
+    zassert_true(buf.isFull());
+
+    zassert_equal(buf.pull(), 5);
+    zassert_equal(buf.pull(), 30);
+
+    zassert_true(buf.push(99));
+    zassert_true(buf.push(369));
+
+    zassert_true(buf.isFull());
+
+    zassert_equal(buf.pull(), 186);
+    zassert_equal(buf.pull(), 99);
+    zassert_equal(buf.pull(), 369);
+
+    zassert_true(buf.isEmpty());
 }
 
 ZTEST(ringBuffer_tests, test_items_order)
@@ -130,29 +181,3 @@ ZTEST(ringBuffer_tests, test_items_order)
 
     zassert_mem_equal(expected.data(), actual.data(), expected.size());
 }
-
-static constexpr int threadPrio = 0;
-static constexpr int stackSize = 1024;
-
-// void producerTask()
-
-// K_THREAD_DEFINE(producer, stackSize, producerTask, NULL, NULL, NULL, threadPrio, 0, 0);
-// K_THREAD_DEFINE(consumer, stackSize, consumerTask, NULL, NULL, NULL, threadPrio, 0, 0);
-
-// ZTEST(ringBuffer_tests, test_thread_safety)
-// {
-//     const std::array<int, 4> expected = {1, 2, 3, 4};
-
-//     myLib::RingBuffer<int, 4> buf;
-
-//     for (int v : expected) {
-//         buf.push(v);
-//     }
-
-//     std::array<int, 4> actual;
-//     for (int& v : actual) {
-//         v = buf.pull();
-//     }
-
-//     zassert_mem_equal(expected.data(), actual.data(), expected.size());
-// }
