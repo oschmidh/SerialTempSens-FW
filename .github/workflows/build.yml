@@ -32,11 +32,10 @@ jobs:
         working-directory: modules/EmbeddedProto
         run: |
           sudo apt update
-          sudo apt install -y unzip curl python3.10-venv
+          sudo apt install -y unzip curl python3.10-venv gcc-12
           curl -L -O https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip
           sudo unzip -o protoc-25.1-linux-x86_64.zip -d /usr/local
           python setup.py
-          sudo apt install --reinstall gcc-12
           sudo ln -s -f /usr/bin/gcc-12 /usr/bin/gcc
 
       - name: Build firmware
