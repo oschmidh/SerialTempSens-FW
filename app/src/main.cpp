@@ -31,7 +31,7 @@ int main()
     channel.start();    // starts rx interrupt
     LOG_DBG("msgChannel started");
 
-    auto process = [&sensors = std::as_const(sensors)](const Command& cmd) -> Reply {
+    const auto process = [&sensors = std::as_const(sensors)](const Command& cmd) noexcept -> Reply {
         LOG_DBG("command received");
 
         Reply rply;
