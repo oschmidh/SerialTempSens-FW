@@ -29,7 +29,7 @@ int main()
     channel.start();    // starts rx interrupt
     LOG_DBG("msgChannel started");
 
-    auto process = [&tempSensors](const Command& cmd) -> Reply {
+    auto process = [&sensors](const Command& cmd) -> Reply {
         LOG_DBG("command received");
 
         Reply rply;

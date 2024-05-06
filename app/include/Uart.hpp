@@ -18,8 +18,8 @@ class UartBuffer {
     DataType pull() noexcept
     {
         _sem.take();
-        const DataType val = _buf.pull();
-        return val;
+        const auto val = _buf.pull();
+        return val.value_or(0);
     }
 
     bool push(DataType b) noexcept
