@@ -1,10 +1,11 @@
 #ifndef SERIALTEMPSENS_FW_APP_INCLUDE_MESSAGECHANNEL_H
 #define SERIALTEMPSENS_FW_APP_INCLUDE_MESSAGECHANNEL_H
 
-#include "Uart.hpp"
+#include "UartReceiveBuffer.hpp"
 #include "FramedWriteBuffer.hpp"
 #include <ReadBufferFixedSize.h>
 
+#include <myLib/Uart.hpp>
 #include <myLib/Framer.hpp>
 
 class MessageChannel {
@@ -64,8 +65,12 @@ class MessageChannel {
         Framer framer(readBuf);
 
         do {
-            const std::uint8_t b = _buf.pull();
-            framer.deframe(b);
+            const auto byte = _buf.pull();
+            if (!byte.has_value()) {
+                continue;
+            }
+
+            framer.deframe(byte.value());
             // printk("unframed\n");
         } while (!framer.msgComplete());
         // printk("rec done\n");
@@ -104,8 +109,8 @@ class MessageChannel {
 
     // Framer _framer;
     // Uart _uart{receive};
-    UartBuffer<32> _buf{};
-    Uart<UartBuffer<32>> _uart;
+    UartReceiveBuffer<32> _buf{};
+    Uart<UartReceiveBuffer<32>> _uart;
 };
 
 #endif    // SERIALTEMPSENS_FW_APP_INCLUDE_MESSAGECHANNEL_H
