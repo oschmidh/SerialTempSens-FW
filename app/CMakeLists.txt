@@ -33,6 +33,7 @@ endif()
 target_link_libraries(app
 PUBLIC
     embeddedProto
+    myLib
 )
 
 target_sources(app
