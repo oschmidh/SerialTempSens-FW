@@ -9,6 +9,8 @@
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/logging/log.h>
 
+#include <utility>
+
 LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
 
 static const struct device* const uart_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_com_uart));
@@ -29,7 +31,7 @@ int main()
     channel.start();    // starts rx interrupt
     LOG_DBG("msgChannel started");
 
-    auto process = [&sensors](const Command& cmd) -> Reply {
+    auto process = [&sensors = std::as_const(sensors)](const Command& cmd) -> Reply {
         LOG_DBG("command received");
 
         Reply rply;
