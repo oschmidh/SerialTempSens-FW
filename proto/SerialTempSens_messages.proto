@@ -1,5 +1,17 @@
 syntax = "proto3";
 
+enum ErrorCode {
+    NoError = 0;
+    GenericError = 1;
+    SensorOpen = 2;
+    InvalidSensorId = 3;
+    IoError = 4;
+}
+
 message Command { uint32 sensorId = 1; }
 
-message Reply { int32 temperature = 2; }
+message Reply
+{
+    ErrorCode error = 1;
+    int32 temperature = 2;
+}
