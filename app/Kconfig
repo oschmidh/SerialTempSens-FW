@@ -12,6 +12,7 @@ endmenu
 
 menu "App"
 rsource "Kconfig.SensorService"
+rsource "Kconfig.MessageChannel"
 endmenu
 
 module = APP

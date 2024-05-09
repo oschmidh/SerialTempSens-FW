@@ -3,10 +3,52 @@
 
 #include "UartReceiveBuffer.hpp"
 #include "FramedWriteBuffer.hpp"
+#include "Framer.hpp"
 #include <ReadBufferFixedSize.h>
 
 #include <myLib/Uart.hpp>
-#include <myLib/Framer.hpp>
+
+#include <type_traits>
+
+static_assert(IS_ENABLED(CONFIG_MESSAGECHANNEL), "Messagechannel KConfig not enabled");
+
+namespace internal {
+
+template <typename>
+struct FunctionTraits;
+
+template <typename RET_T, typename FUNC_T, typename PARAM_T>
+struct FunctionTraits<RET_T (FUNC_T::*)(PARAM_T)> {
+    using ReturnType = RET_T;
+    using ParamType = std::decay_t<PARAM_T>;
+};
+
+template <typename RET_T, typename FUNC_T, typename PARAM_T>
+struct FunctionTraits<RET_T (FUNC_T::*)(PARAM_T) noexcept> {
+    using ReturnType = RET_T;
+    using ParamType = std::decay_t<PARAM_T>;
+};
+
+template <typename RET_T, typename FUNC_T, typename PARAM_T>
+struct FunctionTraits<RET_T (FUNC_T::*)(PARAM_T) const> {
+    using ReturnType = RET_T;
+    using ParamType = std::decay_t<PARAM_T>;
+};
+
+template <typename RET_T, typename FUNC_T, typename PARAM_T>
+struct FunctionTraits<RET_T (FUNC_T::*)(PARAM_T) const noexcept> {
+    using ReturnType = RET_T;
+    using ParamType = std::decay_t<PARAM_T>;
+};
+
+template <typename LAMBDA_T>
+struct LambdaTraits {
+    using FunctionType = decltype(&LAMBDA_T::operator());
+    using ReturnType = typename FunctionTraits<FunctionType>::ReturnType;
+    using ParamType = typename FunctionTraits<FunctionType>::ParamType;
+};
+
+}    // namespace internal
 
 class MessageChannel {
   public:
@@ -59,15 +101,15 @@ class MessageChannel {
     // }
 
     template <typename MSG_T>
-    MSG_T receive() noexcept    // TEST
+    std::optional<MSG_T> receive() noexcept
     {
         EmbeddedProto::ReadBufferFixedSize<32> readBuf;
         Framer framer(readBuf);
 
         do {
-            const auto byte = _buf.pull();
+            const auto byte = _buf.pull(std::chrono::milliseconds(CONFIG_MESSAGECHANNEL_RECEIVE_TIMEOUT));
             if (!byte.has_value()) {
-                continue;
+                return std::nullopt;
             }
 
             framer.deframe(byte.value());
@@ -77,7 +119,7 @@ class MessageChannel {
 
         MSG_T receivedMsg;
         if (receivedMsg.deserialize(readBuf) != ::EmbeddedProto::Error::NO_ERRORS) {
-            return {};    // TODO ??
+            return std::nullopt;
         }
 
         return receivedMsg;
@@ -86,10 +128,15 @@ class MessageChannel {
     template <typename PROCESS_FUNC_T>
     void run(PROCESS_FUNC_T process)
     {
+        using MessageType = typename internal::LambdaTraits<PROCESS_FUNC_T>::ParamType;
+
         while (1) {
-            send(process(receive<Command>()));
+            const auto msg = receive<MessageType>();
+
+            if (msg.has_value()) {
+                send(process(msg.value()));
+            }
         }
-        // const Command cmd = channel.receive<Command>();
     }
 
   private:

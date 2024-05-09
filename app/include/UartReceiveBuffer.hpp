@@ -5,6 +5,7 @@
 #include <myLib/Spinlock.hpp>
 #include <myLib/Semaphore.hpp>
 
+#include <chrono>
 #include <optional>
 #include <cstdint>
 
@@ -12,6 +13,15 @@ template <std::size_t SIZE_V>
 class UartReceiveBuffer {
   public:
     using DataType = std::uint8_t;
+
+    template <typename REP_T, typename PERIOD_T>
+    std::optional<DataType> pull(std::chrono::duration<REP_T, PERIOD_T> timeout) noexcept
+    {
+        if (!_sem.take(timeout)) {
+            return std::nullopt;
+        }
+        return _buf.pull();
+    }
 
     std::optional<DataType> pull() noexcept
     {
