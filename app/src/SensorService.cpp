@@ -25,6 +25,10 @@ void SensorService::start() noexcept
 {
     _threadId = k_thread_create(&_thread, threadStack, K_THREAD_STACK_SIZEOF(threadStack), threadEntry, this, nullptr,
                                 nullptr, CONFIG_SENSORSERVICE_THREAD_PRIO, 0, K_NO_WAIT);
+
+    if constexpr (IS_ENABLED(CONFIG_THREAD_NAME)) {
+        k_thread_name_set(&_thread, "sensorservice");
+    }
 }
 
 auto SensorService::get(std::size_t idx) const noexcept -> std::expected<int, SensorError>
