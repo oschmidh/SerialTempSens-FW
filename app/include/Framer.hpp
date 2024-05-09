@@ -35,7 +35,7 @@ class Framer {
 
     BUFFER_T& _buf;
     State _state = State::Header;
-    std::size_t _len{};
+    std::size_t _len = -1;
 };
 
 #endif    // SERIALTEMPSENS_FW_APP_INCLUDE_FRAMER_H

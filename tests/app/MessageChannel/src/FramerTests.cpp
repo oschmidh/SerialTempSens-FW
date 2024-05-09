@@ -28,13 +28,13 @@ class WriteBuf {
 
 ZTEST_SUITE(framer_tests, NULL, NULL, NULL, NULL, NULL);
 
-// ZTEST(framer_tests, test_init_msgNotComplete)
-// {
-//     myLib::RingBuffer<std::uint8_t, 32> buf;
-//     Framer framer(buf);
+ZTEST(framer_tests, test_init_msgNotComplete)
+{
+    WriteBuf<std::uint8_t, 32> buf;
+    Framer framer(buf);
 
-//     zassert_false(framer.msgComplete());
-// }
+    zassert_false(framer.msgComplete());
+}
 
 ZTEST(framer_tests, test_deframe_msgCompleteSet)
 {
