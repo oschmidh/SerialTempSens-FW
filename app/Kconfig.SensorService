@@ -13,9 +13,9 @@ if SENSORSERVICE
         int "Sensorservice thread priority"
         default 0
 
-    config SENSORSERVICE_STACKSIZE
+    config SENSORSERVICE_STACK_SIZE
         int "Sensorservice thread stack size"
-        default 256
+        default 512
 
     module = SENSORSERVICE
     module-str = SENSORSERVICE
