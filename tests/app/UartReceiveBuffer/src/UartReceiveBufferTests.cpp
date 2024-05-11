@@ -74,13 +74,13 @@ ZTEST(uartReceiveBuffer_tests, test_pull_timeout)
 
     static constexpr unsigned int timeoutMs = 300;
 
-    const auto start = k_uptime_get();
+    auto start = k_uptime_get();
 
     const auto ret = buf.pull(std::chrono::milliseconds(timeoutMs));
 
     const auto actualTimeout = k_uptime_delta(&start);
 
-    zassert_false(ret.has_value);
+    zassert_false(ret.has_value());
     static constexpr unsigned int allowableDelta = timeoutMs / 16;
     // zassert_within(actualTimeout, timeoutMs, allowableDelta);
     zassert_between_inclusive(actualTimeout, timeoutMs, timeoutMs + allowableDelta);
