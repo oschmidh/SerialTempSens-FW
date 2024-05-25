@@ -3,7 +3,6 @@
 #include "SensorService.hpp"
 #include "MessageChannel.hpp"
 
-// #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/usb/usb_device.h>

@@ -77,8 +77,6 @@ class MessageChannel {
   private:
     bool send(auto msg) noexcept
     {
-        // Framer<WriteBuffer>
-        // WriteBuffer writeBuf;
         FramedWriteBuffer writeBuf;
 
         if (msg.serialize(writeBuf) != ::EmbeddedProto::Error::NO_ERRORS) {
@@ -93,7 +91,6 @@ class MessageChannel {
     template <typename MSG_T>
     std::optional<MSG_T> receive() noexcept
     {
-        // TODO make framed readBuffer?
         EmbeddedProto::ReadBufferFixedSize<32> readBuf;
         Framer framer(readBuf);
 
