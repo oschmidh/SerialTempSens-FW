@@ -82,6 +82,5 @@ ZTEST(uartReceiveBuffer_tests, test_pull_timeout)
 
     zassert_false(ret.has_value());
     static constexpr unsigned int allowableDelta = timeoutMs / 16;
-    // zassert_within(actualTimeout, timeoutMs, allowableDelta);
     zassert_between_inclusive(actualTimeout, timeoutMs, timeoutMs + allowableDelta);
 }

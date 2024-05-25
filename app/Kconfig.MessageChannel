@@ -8,8 +8,8 @@ if MESSAGECHANNEL
         int "MessageChannel receive timeout [ms]"
         default 500
 
-    module = SENSORSERVICE
-    module-str = SENSORSERVICE
-    source "subsys/logging/Kconfig.template.log_config"
+    config MESSAGECHANNEL_UART_BUFFER_SIZE
+        int "MessageChannel UART Receivebuffer size"
+        default 32
 
-endif # SENSORSERVICE
+endif # MESSAGECHANNEL
