@@ -1,4 +1,4 @@
-name: Build
+name: Release
 
 on:
   push:
@@ -7,22 +7,25 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download Built FW Image
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v3
         with:
+          workflow: build.yml
+          branch: main
+          event: push
           name: SerialTempSens_image
 
       - name: Rename File
         run: |
           mkdir release
-          cp ./SerialTempSens_image/zephyr.hex release/serialTempSens_${{ github.ref_name }}.hex
+          cp ./zephyr.hex release/serialTempSens_${{ github.ref_name }}.hex
 
       - name: Publish Release
         uses: softprops/action-gh-release@v2
