@@ -3,6 +3,7 @@
 
 #include <zephyr/kernel.h>
 
+#include <chrono>
 #include <cstdint>
 
 namespace myLib {
@@ -13,6 +14,7 @@ class Semaphore {
 
     void give() noexcept { k_sem_give(&_sem); }
     void take() noexcept { k_sem_take(&_sem, K_FOREVER); }
+    bool take(std::chrono::milliseconds timeout) noexcept { return k_sem_take(&_sem, K_MSEC(timeout.count())) == 0; }
     void reset() noexcept { k_sem_reset(&_sem); }
 
   private:

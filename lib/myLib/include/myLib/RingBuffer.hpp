@@ -4,6 +4,7 @@
 #include <mutex>
 #include <optional>
 #include <array>
+#include <cmath>
 #include <cstdint>
 
 namespace myLib {

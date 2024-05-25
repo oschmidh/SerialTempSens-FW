@@ -1,0 +1,15 @@
+config MESSAGECHANNEL
+    bool "MessageChannel"
+    # select REQUIRES_FULL_LIBCPP
+
+if MESSAGECHANNEL
+
+    config MESSAGECHANNEL_RECEIVE_TIMEOUT
+        int "MessageChannel receive timeout [ms]"
+        default 500
+
+    config MESSAGECHANNEL_UART_BUFFER_SIZE
+        int "MessageChannel UART Receivebuffer size"
+        default 32
+
+endif # MESSAGECHANNEL
