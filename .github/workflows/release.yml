@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Built FW Image
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: build.yml
           branch: main
